@@ -9,7 +9,7 @@ node{
         tag="3.0"
 	dockerHubUser="lsmande"
 	containerName="insure-me"
-	httpPort="8080"
+	httpPort="8081"
     }
     
     stage('Code Checkout'){
@@ -26,12 +26,12 @@ node{
     }
     
     stage('Maven Build'){
-        sh "maven clean package"        
+        sh "${mavenCMD} clean package"        
     }
     
-    //stage('Publish Test Reports'){
-      //  publishHTML([allowMissing: false, alwaysLinkToLastBuild: false, keepAll: false, reportDir: 'target/surefire-reports', reportFiles: 'index.html', reportName: 'HTML Report', reportTitles: '', useWrapperFileDirectly: true])
-   // }
+    stage('Publish Test Reports'){
+        publishHTML([allowMissing: false, alwaysLinkToLastBuild: false, keepAll: false, reportDir: 'target/surefire-reports', reportFiles: 'index.html', reportName: 'HTML Report', reportTitles: '', useWrapperFileDirectly: true])
+    }
     
     stage('Docker Image Build'){
         echo 'Creating Docker image'
@@ -41,6 +41,7 @@ node{
     stage('Docker Image Scan'){
         echo 'Scanning Docker image for vulnerbilities'
         sh "docker build -t ${dockerHubUser}/insure-me:${tag} ."
+        echo "Docker Hub User1: ${dockerHubUser}"
     }   
 	
     stage('Publishing Image to DockerHub'){
@@ -49,6 +50,7 @@ node{
 			sh "docker login -u $dockerUser -p $dockerPassword"
 			sh "docker push $dockerUser/$containerName:$tag"
 			echo "Image push complete"
+                        echo "Docker Hub User2: ${dockerHubUser}"
         } 
     }    
 	
@@ -57,8 +59,6 @@ node{
 		sh "docker pull $dockerHubUser/$containerName:$tag"
 		sh "docker run -d --rm -p $httpPort:$httpPort --name $containerName $dockerHubUser/$containerName:$tag"
 		echo "Application started on port: ${httpPort} (http)"
+                echo "Docker Hub User3: ${dockerHubUser}"
 	}
 }
-
-
-
