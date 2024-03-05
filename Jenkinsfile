@@ -9,7 +9,7 @@ node{
         tag="3.0"
 	dockerHubUser="lsmande"
 	containerName="insure-me"
-	httpPort="8081"
+	httpPort="8080"
     }
     
     stage('Code Checkout'){
